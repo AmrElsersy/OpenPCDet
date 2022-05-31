@@ -69,13 +69,13 @@ class DemoDataset(DatasetTemplate):
 def parse_config():
     parser = argparse.ArgumentParser(description='arg parser')
 
-    parser.add_argument('--ext', type=str, default='.bin', help='specify the extension of your point cloud data file')
-
-    parser.add_argument('--cfg_file', type=str, default='cfgs/kitti_models/pointpillar.yaml',
+    # Ouster
+    parser.add_argument('--cfg_file', type=str, default='cfgs/kitti_models/pointpillar_ouster.yaml',
                         help='specify the config for demo')
-    parser.add_argument('--data_path', type=str, default='/home/kitti_original/training/velodyne',
+    parser.add_argument('--data_path', type=str, default='/home/kitti/dataset/kitti/training/velodyne',
                         help='specify the point cloud data file or directory')
-    parser.add_argument('--ckpt', type=str, default='../pointpillar_7728.pth', help='')
+    parser.add_argument('--ckpt', type=str, default='../output/kitti_models/pointpillar_ouster/default/ckpt/checkpoint_epoch_300.pth', help='')
+    parser.add_argument('--ext', type=str, default='.bin', help='specify the extension of your point cloud data file')
 
     args = parser.parse_args()
 
@@ -110,7 +110,6 @@ def main():
 
             start = torch.cuda.Event(enable_timing=True)
             end = torch.cuda.Event(enable_timing=True)
-            start.record()
             # ========================== inference ==========================
 
             # preprocessing
@@ -119,6 +118,8 @@ def main():
                 "frame_id": idx
             }
             data_dict = demo_dataset.prepare_data(data_dict)
+
+            start.record()
             data_dict = demo_dataset.collate_batch([data_dict])
             load_data_to_gpu(data_dict)
             # inference
@@ -133,10 +134,13 @@ def main():
             kitti_objects =model_output_to_kitti_objects(pred_dicts)
 
             # scroe filter
-            score_threshold = 0.6
+            score_threshold = 0.7
+            filtered_objects  = []
             for object in kitti_objects:
-                if object.score < score_threshold:
-                    kitti_objects.remove(object)
+                if object.score > score_threshold:
+                    filtered_objects.append(object)
+            kitti_objects = filtered_objects
+            print([x.score for x in kitti_objects])
 
             # visalization
             visualizer.visualize_scene_bev(pointcloud, kitti_objects, labels, calib)

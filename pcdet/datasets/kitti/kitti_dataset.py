@@ -59,6 +59,7 @@ class KittiDataset(DatasetTemplate):
 
         split_dir = self.root_path / 'ImageSets' / (self.split + '.txt')
         self.sample_id_list = [x.strip() for x in open(split_dir).readlines()] if split_dir.exists() else None
+        print(self.sample_id_list, self.split)
 
     def get_lidar(self, idx):
         lidar_file = self.root_split_path / 'velodyne' / ('%s.bin' % idx)
@@ -477,7 +478,12 @@ if __name__ == '__main__':
         ROOT_DIR = (Path(__file__).resolve().parent / '../../../').resolve()
         create_kitti_infos(
             dataset_cfg=dataset_cfg,
-            class_names=['Car', 'Pedestrian', 'Cyclist'],
-            data_path=ROOT_DIR / 'data' / 'kitti',
-            save_path=ROOT_DIR / 'data' / 'kitti'
+
+            # class_names=['Car', 'Pedestrian', 'Cyclist'],
+            # data_path=ROOT_DIR / 'data' / 'kitti',
+            # save_path=ROOT_DIR / 'data' / 'kitti'
+
+            class_names=['Car', 'Truck', 'Cyclist', "Bus"],
+            data_path=Path(dataset_cfg.DATA_PATH),
+            save_path=Path(dataset_cfg.DATA_PATH)
         )

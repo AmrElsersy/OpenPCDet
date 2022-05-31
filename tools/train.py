@@ -20,7 +20,8 @@ from train_utils.train_utils import train_model
 
 def parse_config():
     parser = argparse.ArgumentParser(description='arg parser')
-    parser.add_argument('--cfg_file', type=str, default=None, help='specify the config for training')
+    # parser.add_argument('--cfg_file', type=str, default='cfgs/kitti_models/pointpillar.yaml', help='specify the config for training')
+    parser.add_argument('--cfg_file', type=str, default='cfgs/kitti_models/pointpillar_ouster.yaml', help='specify the config for training')
 
     parser.add_argument('--batch_size', type=int, default=None, required=False, help='batch size for training')
     parser.add_argument('--epochs', type=int, default=None, required=False, help='number of epochs to train for')
@@ -137,6 +138,7 @@ def main():
                 ckpt_list[-1], to_cpu=dist_train, optimizer=optimizer, logger=logger
             )
             last_epoch = start_epoch + 1
+            print("********************** Loaded model from **********************\n", ckpt_list[-1])
 
     model.train()  # before wrap to DistributedDataParallel to support fixed some parameters
     if dist_train:
